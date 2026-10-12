@@ -2,17 +2,21 @@ package models;
 
 public class User {
 
+	private int userID;
 	private String firstName;
 	private String lastName;
 	private String email;
 	private String password;
 
 	
-	public User(String firstName, String lastName, String email, String password) {
+	public User(int userID, String firstName, String lastName, String email, String password) {
+		this.userID = userID;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
+		this.password = password; // Needs to be encrypted properly when written to the database.
 	}
+	
 	
 	public void setFirstName(String newFirstName) {
 		this.firstName = newFirstName;

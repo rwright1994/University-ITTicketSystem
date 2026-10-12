@@ -25,6 +25,9 @@ dependencies {
 
 	// Add the Web starter to build APIs/Web endpoints for tickets.
 	 implementation("org.springframework.boot:spring-boot-starter-web")
+	 
+	// Mongo
+	 implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	
     // Use JUnit Jupiter for testing.
     testImplementation(libs.junit.jupiter)
