@@ -16,8 +16,11 @@ public class Main {
    
 	   public static void main(String[] args) {
 	        // This launches the built-in server infrastructure
+		   	
 	        SpringApplication.run(Main.class, args);
 	    }
+	   
+	   
 	   
 	   @GetMapping("/home")
 	   public String home(@RequestParam(value="name", defaultValue="World") String name) {
