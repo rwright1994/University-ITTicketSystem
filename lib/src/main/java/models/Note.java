@@ -8,7 +8,7 @@ public class Note {
 	private final Date postedDate;
 	
 	
-	public Note(String contet, Date postedDate) {
+	public Note(String content, Date postedDate) {
 		this.content = content;
 		this.postedDate = new Date();
 	}

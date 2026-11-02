@@ -3,28 +3,55 @@
  */
 package _ITTicketSystem;
 
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import controller.TerminalController;
+import repository.UserRepository;
+import repository.TicketRepository;
+import repository.InMemoryTicketRepository;
+import repository.InMemoryUserRepository;
+import services.TicketIssuingService;
+import services.UserCreationService;
+
 @SpringBootApplication
 @RestController
-public class Main {
 
-   
-	   public static void main(String[] args) {
-	        // This launches the built-in server infrastructure
-		   	
-	        SpringApplication.run(Main.class, args);
-	    }
+public class Main implements CommandLineRunner{
 	   
-	   
-	   
-	   @GetMapping("/home")
-	   public String home(@RequestParam(value="name", defaultValue="World") String name) {
-		   return String.format("Hello %s!", name);
-	   }
+	public static void main(String[] args) {
+		// This launches the built-in server infrastructure
+		SpringApplication.run(Main.class, args);
+	
+	}
+
+	@Override
+	public void run(String... args) throws Exception {
+		
+		
+		TicketIssuingService tis = new TicketIssuingService();
+		UserCreationService ucs = new UserCreationService();
+		TicketRepository tr = new InMemoryTicketRepository();
+		UserRepository ur = new InMemoryUserRepository();
+		TerminalController tc = new TerminalController(tis,ucs,tr,ur);
+		
+		tc.showTitle();
+		while(tc.isRunning()) {
+			System.out.print("Enter a command: ");
+			String input = tc.requestInput();
+			tc.handleInput(input);
+		}
+		
+		System.exit(0);
+	}
+	
+	@GetMapping("/home")
+	public String home(@RequestParam(value="name", defaultValue="World") String name) {
+		return String.format("Hello %s!", name);
+	}
 }
 	

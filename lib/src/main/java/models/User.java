@@ -17,6 +17,9 @@ public class User {
 		this.password = password; // Needs to be encrypted properly when written to the database.
 	}
 	
+	public int getUserId() {
+		return this.userID;
+	}
 	
 	public void setFirstName(String newFirstName) {
 		this.firstName = newFirstName;
@@ -53,5 +56,10 @@ public class User {
 	
 	public String getPassword() {
 		return this.password;
+	}
+	
+	@Override
+	public String toString() {
+	    return "User{id=" + userID + ", firstName='" + firstName + "', lastName='" + lastName + "', email='" + email + "'}";
 	}
 }
