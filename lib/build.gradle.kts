@@ -22,23 +22,18 @@ repositories {
 }
 
 dependencies {
-
-	// Add the Web starter to build APIs/Web endpoints for tickets.
-	 implementation("org.springframework.boot:spring-boot-starter-web")
-	 
-	// Mongo
-	 implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+	
+	
+	implementation(platform("org.mongodb:mongodb-driver-bom:5.13.0"))
+    implementation("org.mongodb:mongodb-driver-sync")
+    
+    implementation("org.slf4j:slf4j-api:2.0.17")
+    runtimeOnly("ch.qos.logback:logback-classic:1.5.18")
 	
     // Use JUnit Jupiter for testing.
     testImplementation(libs.junit.jupiter)
-
+    testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	
-	//Testing Support
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
     implementation("org.apache.commons:commons-math3:3.6.1")
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.

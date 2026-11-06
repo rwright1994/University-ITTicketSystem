@@ -3,12 +3,14 @@
  */
 package _ITTicketSystem;
 
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+
+import config.MongoConfig;
+
+import java.nio.file.Path;
+
+import org.bson.Document;
 
 import controller.TerminalController;
 import repository.UserRepository;
@@ -18,20 +20,24 @@ import repository.InMemoryUserRepository;
 import services.TicketIssuingService;
 import services.UserCreationService;
 
-@SpringBootApplication
-@RestController
 
-public class Main implements CommandLineRunner{
+public class Main{
 	   
 	public static void main(String[] args) {
-		// This launches the built-in server infrastructure
-		SpringApplication.run(Main.class, args);
-	
-	}
-
-	@Override
-	public void run(String... args) throws Exception {
 		
+		Path configFile = Path.of("config", "mongodb.properties");
+		
+		try {
+		MongoConfig config = MongoConfig.load(configFile);
+		System.out.println("Connected");
+		}catch(Exception ex) {
+			System.err.println(ex);
+//            System.err.println("Application could not start or lost its database connection.");
+//            System.err.println("Check config/mongodb.properties, the CSV file, and Atlas network access.");
+//            System.err.println("Diagnostic type: " + ex.getClass().getSimpleName());
+            
+		}
+		System.out.println(System.getenv("MONGODB_URI"));
 		
 		TicketIssuingService tis = new TicketIssuingService();
 		UserCreationService ucs = new UserCreationService();
@@ -47,11 +53,6 @@ public class Main implements CommandLineRunner{
 		}
 		
 		System.exit(0);
-	}
 	
-	@GetMapping("/home")
-	public String home(@RequestParam(value="name", defaultValue="World") String name) {
-		return String.format("Hello %s!", name);
 	}
 }
-	

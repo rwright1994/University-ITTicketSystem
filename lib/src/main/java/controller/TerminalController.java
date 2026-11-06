@@ -6,8 +6,7 @@ import java.util.Scanner;
 import com.google.common.base.Optional;
 
 import models.User;
-import repository.InMemoryTicketRepository;
-import repository.InMemoryUserRepository;
+
 import repository.TicketRepository;
 import repository.UserRepository;
 import services.TicketIssuingService;
@@ -15,6 +14,13 @@ import services.UserCreationService;
 
 public class TerminalController {
 
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+	
 	private boolean running;
 	private final Scanner scanner = new Scanner(System.in);
 	
@@ -70,10 +76,7 @@ public class TerminalController {
 	}
 	
 	public void handleInput(String input) {
-		
 		Runnable command = commands.get(input.toLowerCase().trim());
-		
-
 		if(command == null) {
 			System.out.println("Please enter a valid command.");
 			return;
@@ -83,6 +86,7 @@ public class TerminalController {
 	
 	
 	private void handleCreateTicket() {
+		
 		
 		System.out.print("Enter title:");
 		String title = scanner.nextLine();
@@ -95,19 +99,43 @@ public class TerminalController {
 	
 	private void handleFindUser() {
 		System.out.print("Enter the user's ID:");
-		int id = scanner.nextInt();
-		findUserById(id);
+		if (scanner.hasNextInt()){
+			int id = scanner.nextInt();
+			scanner.nextLine();
+			findUserById(id);
+		}else {
+			setTextColor(ANSI_RED);
+			System.out.println("Incorrect format");
+			resetTextColor();
+			scanner.nextLine();
+		}
 	}
 	
+	
 	private void handleCreateUser() {
+		
 		System.out.print("Enter your first Name:");
+		setTextColor(ANSI_RED);
 		String fn = scanner.nextLine();
+		resetTextColor();
+	
 		System.out.print("Enter your last name:");
+		setTextColor(ANSI_RED);
 		String ln = scanner.nextLine();
+		resetTextColor();
+		
+		
 		System.out.print("Enter your email address:");
+		setTextColor(ANSI_RED);
 		String email = scanner.nextLine();
+		resetTextColor();
+		
+		setTextColor(ANSI_RED);
 		System.out.print("Enter your password:");
 		String pw = scanner.nextLine();
+		resetTextColor();
+		resetTextColor();
+		
 		User testUser = userCreationService.createUser(fn, ln, email, pw);
 		userRepository.save(testUser);
 		
@@ -137,16 +165,27 @@ public class TerminalController {
 	}
 	
 	private void showHelp() {
+		setTextColor(ANSI_YELLOW);
 		System.out.println("------ Available Commands -------");
-		System.out.println("  help - Show available commands.");
-		System.out.println("  new - Submit a new ticket.     ");
-		System.out.println("  list - Open list menu.         ");
-		System.out.println("  exit - Exit application/       ");
+		System.out.println("  help           - Show available commands.");
+		System.out.println("  submit-ticket  - Submit a new ticket.");
+		System.out.println("  create-account - Register a new user.");
+		System.out.println("  find-user      - Locate user profile via ID.");
+		System.out.println("  exit           - Exit application.");
+		resetTextColor();
 	}
 	
 	private void findUserById(int id) {
 		Optional<User> foundUser = userRepository.findUserById(id);
 		System.out.println(foundUser);
+	}
+	
+	private void setTextColor(String ansi) {
+		System.out.print(ansi); 
+	}
+	
+	private void resetTextColor() {
+		System.out.print(ANSI_RESET);
 	}
 	
 	
