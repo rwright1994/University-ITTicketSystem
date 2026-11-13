@@ -5,49 +5,60 @@ package _ITTicketSystem;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
 
-import config.MongoConfig;
+import _ITTicketSystem.config.MongoConfig;
+import _ITTicketSystem.controller.TerminalController;
+import _ITTicketSystem.repository.InMemoryTicketRepository;
+import _ITTicketSystem.repository.InMemoryUserRepository;
+import _ITTicketSystem.repository.MongoTicketRepository;
+import _ITTicketSystem.repository.MongoUserRepository;
+import _ITTicketSystem.repository.TicketRepository;
+import _ITTicketSystem.repository.UserRepository;
+import _ITTicketSystem.services.TicketIssuingService;
+import _ITTicketSystem.services.TicketNoteService;
+import _ITTicketSystem.services.UserCreationService;
 
 import java.nio.file.Path;
 
 import org.bson.Document;
 
-import controller.TerminalController;
-import repository.UserRepository;
-import repository.TicketRepository;
-import repository.InMemoryTicketRepository;
-import repository.InMemoryUserRepository;
-import services.TicketIssuingService;
-import services.UserCreationService;
-
 
 public class Main{
+	 
 	   
 	public static void main(String[] args) {
 		
-		Path configFile = Path.of("config", "mongodb.properties");
 		
+		Path configFile = Path.of("config", "mongodb.properties");
+		MongoDatabase db = null;
 		try {
-		MongoConfig config = MongoConfig.load(configFile);
-		System.out.println("Connected");
+			MongoConfig config = MongoConfig.load(configFile);
+			MongoClient client = config.connect();
+			db = client.getDatabase("university-ticketeer");
+			
+			System.out.println("Connected");
 		}catch(Exception ex) {
 			System.err.println(ex);
-//            System.err.println("Application could not start or lost its database connection.");
-//            System.err.println("Check config/mongodb.properties, the CSV file, and Atlas network access.");
-//            System.err.println("Diagnostic type: " + ex.getClass().getSimpleName());
-            
+			
 		}
-		System.out.println(System.getenv("MONGODB_URI"));
 		
-		TicketIssuingService tis = new TicketIssuingService();
-		UserCreationService ucs = new UserCreationService();
+		
+		MongoUserRepository mur = new MongoUserRepository(db);
+		MongoTicketRepository mtr = new MongoTicketRepository(db,mur);
 		TicketRepository tr = new InMemoryTicketRepository();
 		UserRepository ur = new InMemoryUserRepository();
-		TerminalController tc = new TerminalController(tis,ucs,tr,ur);
+		
+		TicketIssuingService tis = new TicketIssuingService(mtr);
+		TicketNoteService tns = new TicketNoteService(mtr);
+		UserCreationService ucs = new UserCreationService(mur);
+
+		TerminalController tc = new TerminalController(tis,tns,ucs);
 		
 		tc.showTitle();
+		tc.handleLogin();
 		while(tc.isRunning()) {
-			System.out.print("Enter a command: ");
+			System.out.print("Enter a command:");
 			String input = tc.requestInput();
 			tc.handleInput(input);
 		}
@@ -55,4 +66,5 @@ public class Main{
 		System.exit(0);
 	
 	}
+	 
 }
