@@ -167,32 +167,6 @@ public class Ticket {
 	
 	@Override
 	public String toString() {
-	    return String.format(
-	        """
-	        --------------------------------------------------------------------------------
-	    		           			TICKET DETAILS
-	        --------------------------------------------------------------------------------
-	        Ticket ID:       %s
-	        Title:           %s
-	        Description:     %s
-	        Category:        %s
-	        Status:          %s
-	        Submitted:       %s
-	        Closed:          %s
-	        Submitted By:    %s
-	        Assigned To:     %s
-	        --------------------------------------------------------------------------------
-	        """,
-	        ticketID,
-	        title,
-	        description,
-	        category,
-	        status,
-	        submissionDate,
-	        closeDate == null ? "Not closed" : closeDate,
-	        user == null ? "Unknown" : user.getFirstName() + " " + user.getLastName(),
-	        technician == null ? "Unassigned" :
-	            technician.getFirstName() + " " + technician.getLastName()
-	    );
+		return null;
 	}
 }

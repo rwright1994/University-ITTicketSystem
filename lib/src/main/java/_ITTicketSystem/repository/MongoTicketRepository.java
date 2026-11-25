@@ -98,7 +98,7 @@ public class MongoTicketRepository implements TicketRepository{
 		Ticket ticket = new Ticket(
 				found.getString("ticketId"),
 				found.getString("title"),
-				found.getString("descripotion"),
+				found.getString("description"),
 				TicketCategory.valueOf(found.getString("ticketCategory")),
 				submissionDate,
 				TicketStatus.valueOf(found.getString("status")));

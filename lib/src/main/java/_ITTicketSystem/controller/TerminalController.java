@@ -12,8 +12,6 @@ import _ITTicketSystem.models.Technician;
 import _ITTicketSystem.models.Ticket;
 import _ITTicketSystem.models.TicketCategory;
 import _ITTicketSystem.models.User;
-import _ITTicketSystem.repository.TicketRepository;
-import _ITTicketSystem.repository.UserRepository;
 import _ITTicketSystem.services.RegularTerminalPolicy;
 import _ITTicketSystem.services.TechnicianTerminalPolicy;
 import _ITTicketSystem.services.TerminalPolicy;
@@ -22,9 +20,9 @@ import _ITTicketSystem.services.TicketNoteService;
 import _ITTicketSystem.services.UserCreationService;
 import _ITTicketSystem.utils.TerminalFormatter;
 import _ITTicketSystem.utils.TerminalTicketFormatter;
+import _ITTicketSystem.utils.TerminalNoteFormatter;
 import _ITTicketSystem.utils.TerminalUserFormatter;
 
-import java.util.Optional;
 
 public class TerminalController {
 
@@ -35,8 +33,6 @@ public class TerminalController {
     public static final String ANSI_YELLOW = "\u001B[33m";
     public static final String ANSI_BLUE = "\u001B[34m";
     
-    
-	
 	private boolean running;
 	private final Scanner scanner = new Scanner(System.in);
 	
@@ -45,8 +41,10 @@ public class TerminalController {
 	private final TicketNoteService ticketNoteService;
 	private TerminalPolicy terminalPolicy;
 	
-	private final TerminalFormatter<Ticket> ticketFormatter = new TerminalTicketFormatter();
-	private final TerminalFormatter<User> userFormatter = new TerminalUserFormatter();
+
+	private TerminalFormatter<Ticket> ticketFormatter;
+	private TerminalFormatter<User> userFormatter;
+	private TerminalFormatter<Note> noteFormatter;
 
 	private final Map<String, Runnable> commands;
 	private User currUser;
@@ -154,14 +152,14 @@ public class TerminalController {
 			resetTextColor();
 			Ticket foundTicket = ticketIssuingService.findTicketById(ticketId).orElseThrow( () -> new RuntimeException("No ticket found matching the provided ID."));
 			
-			System.out.println(foundTicket);
+			setTextColor(ANSI_GREEN);
+			System.out.println(ticketFormatter.format(foundTicket));
 			if(foundTicket.getNotes() != null) {
+				
 				List<Note> ticketNotes = foundTicket.getNotes();
-				System.out.println("				    NOTES");
-				for(Note note: ticketNotes) {
-					System.out.println(note);
-				}
+				System.out.println(noteFormatter.format(ticketNotes));
 			}
+			resetTextColor();
 			
 		
 		}else if(selection.equalsIgnoreCase("all-tickets")) {
@@ -249,17 +247,30 @@ public class TerminalController {
 	}
 	
 	public void handleAddNote() {
+		NoteVisibility visibility = null;
 		System.out.println("What ticket would you like to add a note to? (Enter ticket id)");
 		setTextColor(ANSI_RED);
 		String ticketId = scanner.nextLine();
 		resetTextColor();
+		
+		if(terminalPolicy instanceof TechnicianTerminalPolicy) {
+			System.out.println("Is this note for internal use Y/N?");
+			setTextColor(ANSI_RED);
+			String input = scanner.nextLine();
+			if(input.equalsIgnoreCase("y")) {
+				visibility = NoteVisibility.INTERNAL;
+			}else {
+				visibility = NoteVisibility.EXTERNAL;
+			}
+			resetTextColor();
+		}
 		
 		System.out.println("Enter new details for the note:");
 		setTextColor(ANSI_RED);
 		String content = scanner.nextLine();
 		resetTextColor();
 		int num = ticketIssuingService.findTicketById(ticketId).orElseThrow( () -> new RuntimeException("No ticket found matching the provided ID.")).getNotes().size() +1;
-		Note note = ticketNoteService.create(Integer.toString(num),content, currUser, NoteVisibility.EXTERNAL);
+		Note note = ticketNoteService.create(Integer.toString(num),content, currUser, visibility);
 		ticketNoteService.addNote(ticketId, note);
 		
 	}
@@ -282,14 +293,19 @@ public class TerminalController {
 		
 		if(foundUser != null) {
 			currUser = foundUser;
-			if(foundUser instanceof Student || foundUser instanceof Employee && !(foundUser instanceof Technician)) {
-				terminalPolicy = new RegularTerminalPolicy();
-				System.out.println("Created regular policy");
-			}else if(foundUser instanceof Technician) {
+			if(foundUser instanceof Technician) {
 				terminalPolicy = new TechnicianTerminalPolicy();
 				System.out.println("Created technician policy");
+			}else if ((foundUser instanceof Student || foundUser instanceof Employee)){
+				terminalPolicy = new RegularTerminalPolicy();
+				System.out.println("Created regular policy");
 			}
 		}
+		
+		ticketFormatter = new TerminalTicketFormatter();
+		userFormatter = new TerminalUserFormatter();
+		noteFormatter = new TerminalNoteFormatter(terminalPolicy);
+		
 	}
 	
 	public String requestInput() {

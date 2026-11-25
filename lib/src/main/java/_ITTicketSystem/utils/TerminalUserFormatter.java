@@ -7,6 +7,11 @@ import _ITTicketSystem.models.User;
 public class TerminalUserFormatter implements TerminalFormatter<User> {
 
 	@Override
+	public String format(User user) {
+		return null;
+	}
+	
+	@Override
 	public String format(List<User> users) {
 
 	    StringBuilder output = new StringBuilder();
