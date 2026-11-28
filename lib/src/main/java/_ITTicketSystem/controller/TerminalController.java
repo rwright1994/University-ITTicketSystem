@@ -12,7 +12,7 @@ import _ITTicketSystem.models.Technician;
 import _ITTicketSystem.models.Ticket;
 import _ITTicketSystem.models.TicketCategory;
 import _ITTicketSystem.models.User;
-import _ITTicketSystem.services.RegularTerminalPolicy;
+import _ITTicketSystem.services.UserTerminalPolicy;
 import _ITTicketSystem.services.TechnicianTerminalPolicy;
 import _ITTicketSystem.services.TerminalPolicy;
 import _ITTicketSystem.services.TicketIssuingService;
@@ -58,6 +58,7 @@ public class TerminalController {
 		this.commands = Map.of(
 				"help", this::showHelp,
 				"create-account", this::handleCreateUser,
+				"close-ticket", this::handleCloseTicket,
 				"submit-ticket", this::handleSubmitTicket,
 				"add-note", this::handleAddNote,
 				"find", this::handleFind,
@@ -155,7 +156,6 @@ public class TerminalController {
 			setTextColor(ANSI_GREEN);
 			System.out.println(ticketFormatter.format(foundTicket));
 			if(foundTicket.getNotes() != null) {
-				
 				List<Note> ticketNotes = foundTicket.getNotes();
 				System.out.println(noteFormatter.format(ticketNotes));
 			}
@@ -226,9 +226,7 @@ public class TerminalController {
 		User foundUser = userCreationService.findUserById(id).orElseThrow( () -> new RuntimeException("No user found matching the provide ID."));
 		
 		if(foundUser != null) {
-			System.out.println(foundUser);
-			Ticket ticket = ticketIssuingService.issueTicket(title,description, ticketCategory,foundUser);
-			System.out.println(ticket);
+			Ticket ticket = ticketIssuingService.issueTicket(title,description, ticketCategory,foundUser.getUserId());
 			ticketIssuingService.save(ticket);
 		}
 	}
@@ -272,16 +270,18 @@ public class TerminalController {
 		int num = ticketIssuingService.findTicketById(ticketId).orElseThrow( () -> new RuntimeException("No ticket found matching the provided ID.")).getNotes().size() +1;
 		Note note = ticketNoteService.create(Integer.toString(num),content, currUser, visibility);
 		ticketNoteService.addNote(ticketId, note);
+	}
+	
+	public void handleCloseTicket() {
+		setTextColor(ANSI_GREEN);
+		List<Ticket> tickets = ticketIssuingService.findAllTickets();
+		System.out.println(ticketFormatter.format(tickets));
+		resetTextColor();
+		System.out.println("What ticket would you like to close (Enter ID):");
+		int id = scanner.nextInt();
+		tickets.get(id-1).closeTicket();
+		ticketIssuingService.update(tickets.get(id-1));
 		
-	}
-	
-	
-	private void setTextColor(String ansi) {
-		System.out.print(ansi); 
-	}
-	
-	private void resetTextColor() {
-		System.out.print(ANSI_RESET);
 	}
 	
 	public void handleLogin() {
@@ -295,10 +295,8 @@ public class TerminalController {
 			currUser = foundUser;
 			if(foundUser instanceof Technician) {
 				terminalPolicy = new TechnicianTerminalPolicy();
-				System.out.println("Created technician policy");
 			}else if ((foundUser instanceof Student || foundUser instanceof Employee)){
-				terminalPolicy = new RegularTerminalPolicy();
-				System.out.println("Created regular policy");
+				terminalPolicy = new UserTerminalPolicy();
 			}
 		}
 		
@@ -326,5 +324,16 @@ public class TerminalController {
 		}
 		command.run();
 	}
+	
+	private void setTextColor(String ansi) {
+		System.out.print(ansi); 
+	}
+	
+	private void resetTextColor() {
+		System.out.print(ANSI_RESET);
+	}
+	
+	
+
 	
 }

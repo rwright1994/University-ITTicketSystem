@@ -5,7 +5,7 @@ import java.util.List;
 
 import _ITTicketSystem.models.Note;
 import _ITTicketSystem.models.NoteVisibility;
-import _ITTicketSystem.services.RegularTerminalPolicy;
+import _ITTicketSystem.services.UserTerminalPolicy;
 import _ITTicketSystem.services.TechnicianTerminalPolicy;
 import _ITTicketSystem.services.TerminalPolicy;
 
@@ -37,31 +37,20 @@ public class TerminalNoteFormatter implements TerminalFormatter<Note> {
         	if(tp.canViewNote(note)) {
 	            output.append("+-------------------------------------------------------------------------------+\n");
 	
-	            output.append(String.format("| Posted By:  %s%n",
-	                    note.getUser() == null ? "Unknown" :
-	                            note.getUser().getFirstName() + " " +
-	                            note.getUser().getLastName()));
-	
-	            output.append(String.format("| Date:       %s%n",
-	                    note.getPostedDate().format(
-	                            DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")
-	                    )));
+	            output.append(String.format("| Posted By:  %s%n", note.getUser() == null ? "Unknown" : note.getUser().getFirstName() + " " +note.getUser().getLastName()));
+	            output.append(String.format("| Date:       %s%n", note.getPostedDate().format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm"))));
 	
 	            String content = note.getContent();
 	            int contentWidth = 64;
 	
 	            for (int i = 0; i < content.length(); i += contentWidth) {
-	
 	                int end = Math.min(i + contentWidth, content.length());
-	
 	                output.append(i == 0 ? "| Content:    " : "|             ");
 	                output.append(content, i, end).append("\n");
 	            }
-	
 	            output.append("+-------------------------------------------------------------------------------+\n");
         	}
         }
-
         return output.toString();
     }
 

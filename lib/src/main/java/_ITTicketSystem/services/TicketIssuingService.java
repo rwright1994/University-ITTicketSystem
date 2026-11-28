@@ -1,11 +1,14 @@
 package _ITTicketSystem.services;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import _ITTicketSystem.models.Technician;
 import _ITTicketSystem.models.Ticket;
+import _ITTicketSystem.models.TicketBuilder;
 import _ITTicketSystem.models.TicketCategory;
+import _ITTicketSystem.models.TicketStatus;
 import _ITTicketSystem.models.User;
 import _ITTicketSystem.repository.TicketRepository;
 
@@ -20,8 +23,16 @@ public class TicketIssuingService {
 	}
 	
 	
-	public Ticket issueTicket(String title, String description, TicketCategory category, User user) {
-		Ticket ticket = new Ticket(String.valueOf(nextId), title,description,category,user);
+	public Ticket issueTicket(String title, String description, TicketCategory category, String userID) {
+		Ticket ticket = new TicketBuilder()
+				.ticketID(String.valueOf(nextId))
+				.title(title)
+				.description(description)
+				.category(category)
+				.status(TicketStatus.NEW)
+				.submissionDate(LocalDateTime.now())
+				.userID(userID)
+				.build();
 		nextId++;
 		return ticket;
 	}
@@ -32,6 +43,10 @@ public class TicketIssuingService {
 	
 	public void save(Ticket ticket) {
 		repository.save(ticket);
+	}
+	
+	public void update(Ticket ticket) {
+		repository.findTicketAndUpdate(ticket);
 	}
 	
 	public Ticket delete(String ticketId){

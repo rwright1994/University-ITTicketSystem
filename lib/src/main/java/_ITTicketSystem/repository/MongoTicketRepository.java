@@ -23,6 +23,7 @@ import static com.mongodb.client.model.Filters.eq;
 import _ITTicketSystem.models.Note;
 import _ITTicketSystem.models.NoteVisibility;
 import _ITTicketSystem.models.Ticket;
+import _ITTicketSystem.models.TicketBuilder;
 import _ITTicketSystem.models.TicketCategory;
 import _ITTicketSystem.models.TicketStatus;
 import _ITTicketSystem.models.User;
@@ -55,7 +56,7 @@ public class MongoTicketRepository implements TicketRepository{
 		.append("ticketCategory", ticket.getCategory())
 		.append("submissionDate", ticket.getSubmissionDate())
 		.append("status", ticket.getStatus())
-		.append("userId", ticket.getUser().getUserId());
+		.append("userId", ticket.getUserID());
 		
 		collection.insertOne(newTicket);
 	}
@@ -64,13 +65,15 @@ public class MongoTicketRepository implements TicketRepository{
 	public List<Ticket> findAllTickets() {
 	    List<Ticket> tickets = new ArrayList<>();
 	    for (Document document : collection.find()) {
-	    	Ticket ticket = new Ticket(
-	    			document.getString("ticketId"),
-	    			document.getString("title"),
-	    			document.getString("descripotion"),
-					TicketCategory.valueOf(document.getString("ticketCategory")),
-					convertToLocalDateTime(document.getDate("submissionDate")),
-					TicketStatus.valueOf(document.getString("status")));
+	    	Ticket ticket = new TicketBuilder()
+	    			.ticketID(document.getString("ticketId"))
+	    			.title(document.getString("title"))
+	    			.description(document.getString("description"))
+					.category(TicketCategory.valueOf(document.getString("ticketCategory")))
+					.submissionDate(convertToLocalDateTime(document.getDate("submissionDate")))
+					.status(TicketStatus.valueOf(document.getString("status")))
+					.userID(document.getString("userId"))
+	    			.build();
 			
 	        tickets.add(ticket);
 	    }
@@ -95,13 +98,14 @@ public class MongoTicketRepository implements TicketRepository{
 		LocalDateTime submissionDate = convertToLocalDateTime(found.getDate("submissionDate"));
 		
 		
-		Ticket ticket = new Ticket(
-				found.getString("ticketId"),
-				found.getString("title"),
-				found.getString("description"),
-				TicketCategory.valueOf(found.getString("ticketCategory")),
-				submissionDate,
-				TicketStatus.valueOf(found.getString("status")));
+		Ticket ticket = new TicketBuilder()
+				.ticketID(found.getString("ticketId"))
+				.title(found.getString("title"))
+				.description(found.getString("description"))
+				.category(TicketCategory.valueOf(found.getString("ticketCategory")))
+				.submissionDate(submissionDate)
+				.status(TicketStatus.valueOf(found.getString("status")))
+				.build();
 		
 		List<Document>notes = found.getList("notes",Document.class);
 		if(notes != null) {
@@ -123,14 +127,6 @@ public class MongoTicketRepository implements TicketRepository{
 		return null;
 	}
 	
-	private LocalDateTime convertToLocalDateTime(Date date) {
-		LocalDateTime submission = date.toInstant()
-		    .atZone(ZoneId.systemDefault())
-		    .toLocalDateTime();
-		
-		return submission;
-	}
-	
 	public int getNextTicketId() {
 	    Document lastTicket = collection.find()
 	            .sort(Sorts.descending("ticketId"))
@@ -144,13 +140,24 @@ public class MongoTicketRepository implements TicketRepository{
 		return nextId;
 	}
 
-
 	@Override
 	public void findTicketAndUpdate(Ticket ticket) {
-		// TODO Auto-generated method stub
 		
+		Document updatedTicket = new Document()
+				.append("ticketId",ticket.getTicketID())
+				.append("title", ticket.getTitle())
+				.append("description",ticket.getDescription())
+				.append("ticketCategory", ticket.getCategory())
+				.append("submissionDate", ticket.getSubmissionDate())
+				.append("closeDate", ticket.getCloseDate())
+				.append("status", ticket.getStatus())
+				.append("technician", ticket.getTechnicianID())
+				.append("userId", ticket.getUserID());
+				
+		collection.findOneAndReplace(
+				Filters.eq("ticketId", ticket.getTicketID()),
+				updatedTicket);
 	}
-
 
 	@Override
 	public void addNote(String ticketId, Note note) {
@@ -167,6 +174,14 @@ public class MongoTicketRepository implements TicketRepository{
 	        Filters.eq("ticketId", ticketId),
 	        Updates.push("notes", noteDocument)
 	    );
+	}
+	
+	private LocalDateTime convertToLocalDateTime(Date date) {
+		LocalDateTime submission = date.toInstant()
+		    .atZone(ZoneId.systemDefault())
+		    .toLocalDateTime();
+		
+		return submission;
 	}
 	
 	

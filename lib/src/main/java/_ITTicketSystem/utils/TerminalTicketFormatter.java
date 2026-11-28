@@ -44,15 +44,13 @@ public class TerminalTicketFormatter implements TerminalFormatter<Ticket> {
 	            +-------------------------------------------------------------------------------+
 	            Ticket ID:       %s
 	            Title:           %s
-	            Description:     """,
+	            """,
 	            ticket.getTicketID(),
-	            ticket.getTitle()
-	    ));
+	            ticket.getTitle()));
 
-
-	    appendWrappedDescription(output, ticket.getDescription(),64);
-
-	    output.append(String.format(
+	    		output.append("Description:     ");
+	    		appendWrappedDescription(output, ticket.getDescription(),64);
+	    		output.append(String.format(
 	            """
 	            Category:        %s
 	            Status:          %s
@@ -66,11 +64,8 @@ public class TerminalTicketFormatter implements TerminalFormatter<Ticket> {
 	            ticket.getStatus(),
 	            ticket.getSubmissionDate(),
 	            ticket.getCloseDate() == null ? "Not closed" : ticket.getCloseDate(),
-	            ticket.getUser() == null ? "Unknown" :
-	                    ticket.getUser().getFirstName() + " " + ticket.getUser().getLastName(),
-	            ticket.getTechnician() == null ? "Unassigned" :
-	                    ticket.getTechnician().getFirstName() + " " +
-	                    ticket.getTechnician().getLastName()
+	            ticket.getUserID() == null ? "Unknown" : ticket.getUserID(),
+	            ticket.getTechnicianID() == null ? "Unassigned" : ticket.getTechnicianID()
 	    ));
 
 	    return output.toString();
@@ -89,14 +84,11 @@ public class TerminalTicketFormatter implements TerminalFormatter<Ticket> {
 	            }
 	        }
 
-	        if (start > 0) {
+	        if (start > 0){
 	            output.append("                 ");
 	        }
-
 	        output.append(description.substring(start, end).trim()).append("\n");
-
 	        start = end;
-
 	        while (start < description.length() && description.charAt(start) == ' ') {
 	            start++;
 	        }

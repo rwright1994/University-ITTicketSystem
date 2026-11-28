@@ -28,6 +28,12 @@ public class InMemoryTicketRepository implements TicketRepository {
     public void save(Ticket ticket) {
         ticketsById.put(ticket.getTicketID(), ticket);
     }
+    
+	@Override
+	public void findTicketAndUpdate(Ticket ticket) {
+		// TODO Auto-generated method stub
+		
+	}
 
     @Override
     public void deleteById(String id) {
@@ -46,11 +52,7 @@ public class InMemoryTicketRepository implements TicketRepository {
 		return 0;
 	}
 
-	@Override
-	public void findTicketAndUpdate(Ticket ticket) {
-		// TODO Auto-generated method stub
-		
-	}
+
 
 	@Override
 	public void addNote(String ticketId, Note note) {

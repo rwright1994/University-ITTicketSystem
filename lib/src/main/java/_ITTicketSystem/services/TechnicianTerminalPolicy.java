@@ -4,14 +4,15 @@ import _ITTicketSystem.models.Note;
 
 public class TechnicianTerminalPolicy implements TerminalPolicy {
 	
-	private static final String[] technicianCommands = {"help","create-account","submit-ticket","find","view","exit","ticket", "all-tickets", "user", "all-user", "add-note"};
+	private static final String[] technicianCommands = {"help","create-account","submit-ticket","assign-ticket","find","view","exit","ticket", "all-tickets", "user", "all-user", "add-note", "close-ticket"};
 
 	@Override
 	public void displayHelp() {
 		System.out.println("+----------------------------- Available Commands ------------------------------+");
-		System.out.println("  take-ticket    - assigns a ticket to the current technician.");
 		System.out.println("  create-account - Register a new user.");
+		System.out.println("  assign-ticket  - assign a ticket technician.");
 		System.out.println("  submit-ticket  - Submit a new ticket.");
+		System.out.println("  close-ticket   - Close a ticket by ID.");
 		System.out.println("  find           - Find a ticket or user.");
 		System.out.println("  view           - view all tickets.");
 		System.out.println("  help           - Show available commands.");
@@ -30,9 +31,6 @@ public class TechnicianTerminalPolicy implements TerminalPolicy {
 		System.out.println("+-------------------------------------------------------------------------------+");
 	}
 	
-	public void displayNotes() {
-		
-	}
 
 	@Override
 	public boolean isAuthorizedCommand(String command) {

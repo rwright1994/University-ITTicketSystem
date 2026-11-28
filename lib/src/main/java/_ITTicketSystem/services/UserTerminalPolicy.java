@@ -3,7 +3,7 @@ package _ITTicketSystem.services;
 import _ITTicketSystem.models.Note;
 import _ITTicketSystem.models.NoteVisibility;
 
-public class RegularTerminalPolicy implements TerminalPolicy {
+public class UserTerminalPolicy implements TerminalPolicy {
 
 	private static final String[] regularCommands = {"help","submit-ticket","add-note","view","find", "help","exit", "ticket", "all-tickets", "add-note"};
 	

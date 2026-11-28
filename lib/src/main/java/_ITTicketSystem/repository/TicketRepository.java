@@ -15,13 +15,13 @@ public interface TicketRepository {
 	
 	List<Ticket> findAllByUserId(String id);
 	
+	void findTicketAndUpdate(Ticket ticket);
+	
 	void save(Ticket ticket);
 	
 	void addNote(String ticketId, Note note);
 	
 	void deleteById(String id);
-	
-	void findTicketAndUpdate(Ticket ticket);
 	
 	public int getNextTicketId();
 	
